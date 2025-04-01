@@ -1,0 +1,12 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#ifndef NDEBUG
+#define SLOW_MOTION
+#define THRESHOLDS_OPTIMIZATION
+#endif
+
+#define DISABLE_VLAN_STRIPPING_PER_PORT
+#define DISABLE_VLAN_INSERTING_PER_PORT
+
+#endif // CONFIG_H
