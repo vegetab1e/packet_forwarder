@@ -193,7 +193,7 @@ void fillEthernetHeader(struct rte_ether_hdr* ether_header,
     const uint64_t random_number = (uint64_t)(rand() % 256) << 40;
 
     uint8_t* target_mac_addr = (uint8_t*)&ether_header->dst_addr.addr_bytes[0];
-    *((uint64_t*)target_mac_addr) = 0xACE0FBA5E + random_number;
+    *((uint64_t*)target_mac_addr) = 0xE0A5FBE0AC + random_number;
     if (!rte_is_valid_assigned_ether_addr(&ether_header->dst_addr))
         rte_eth_random_addr(target_mac_addr);
 
