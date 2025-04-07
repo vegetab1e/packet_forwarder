@@ -435,13 +435,6 @@ void stopAllDevices()
     uint16_t port_id;
     RTE_ETH_FOREACH_DEV(port_id)
     {
-        struct rte_flow_error error;
-        memset(&error, 0, sizeof(error));
-        if (!!(ret = rte_flow_flush(port_id, &error)))
-            RTE_LOG(ERR, USER1,
-                    "rte_flow_flush() failed: %s\n",
-                    error.message ? error.message : rte_strerror(-ret));
-
         if (!!(ret = rte_eth_dev_stop(port_id)))
             RTE_LOG(ERR, USER1,
                     "rte_eth_dev_stop() failed: %s\n",
