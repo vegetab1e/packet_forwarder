@@ -16,7 +16,9 @@
 
 #include "config.h"
 
-static struct rte_mempool* mbuf_pool;
+#ifdef THRESHOLDS_OPTIMIZATION
+#include "dpdk_thresh.h"
+#endif
 
 #define MIN(a,b) \
     ({ __typeof__ (a) _a = (a); \
@@ -29,9 +31,7 @@ static struct rte_mempool* mbuf_pool;
 #define RX_QUEUE_SIZE 256
 #define TX_QUEUE_SIZE 256
 
-#ifdef THRESHOLDS_OPTIMIZATION
-#include "dpdk_thresh.h"
-#endif
+static struct rte_mempool* mbuf_pool;
 
 /**
  * \brief Вывести MAC-адрес сетевого порта в лог (уровень INFO)
