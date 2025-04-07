@@ -58,52 +58,6 @@ bool logMAC(uint16_t port_id)
     return true;
 }
 
-#ifdef DISABLE_VLAN_STRIPPING_PER_PORT_EX
-/**
- * \brief Управление удалением заголовков VLAN
- * \details Внешней и внутренней сети из кадров Ethernet на уровне сетевого порта.
- * Если данный функционал не поддерживается оборудованием/драйвером, то операция
- * считается выполненной успешно, тем не менее сообщение о неудачной попытке
- * изменения настроек будет добавлено в лог (предупреждение, не ошибка)
- * \note При установке запрета на удаление функция не будет проверять, поддерживается
- * ли оно, поэтому сообщения об ошибке тоже не будет, если удаление не поддерживается
- * \param[in] port_id Номер сетевого порта
- * \param[in] off Запрет (1) или разрешение (0) на удаление
- * \return Результат (успешность) выполнения операции
- */
-static inline
-bool controlVlanStripping(uint16_t port_id, bool off)
-{
-    int ret = rte_eth_dev_get_vlan_offload(port_id);
-    if (ret < 0)
-    {
-        RTE_LOG(ERR, USER1, "rte_eth_dev_get_vlan_offload() failed: %s\n", rte_strerror(-ret));
-        return false;
-    }
-
-    const int rx_offload_flags = off ? ret & ~(RTE_ETH_VLAN_STRIP_OFFLOAD | RTE_ETH_QINQ_STRIP_OFFLOAD)
-                                     : ret |  (RTE_ETH_VLAN_STRIP_OFFLOAD | RTE_ETH_QINQ_STRIP_OFFLOAD);
-    if (!!(ret = rte_eth_dev_set_vlan_offload(port_id, rx_offload_flags)))
-    {
-        if (ret == -ENOTSUP)
-        {
-            RTE_LOG(WARNING, USER1,
-                    "[%hu] VLAN stripping is not supported (per-port)\n",
-                    port_id);
-            return true;
-        }
-
-        RTE_LOG(ERR, USER1,
-                "[%hu] rte_eth_dev_set_vlan_offload() failed: %s\n",
-                port_id,
-                rte_strerror(-ret));
-        return false;
-    }
-
-    return true;
-}
-#endif
-
 /**
  * \brief Подогнать количество очередей приёма/передачи под возможности порта
  * \details Проверить количество очередей приёма/передачи на соответствие
@@ -189,7 +143,6 @@ bool setUpRxQueues(PortConfigConstPtr port_config,
 
     int ret;
     for (uint16_t queue_id = 0; queue_id < port_config->rx_queue_count; ++queue_id)
-    {
         if (!!(ret = rte_eth_rx_queue_setup(port_config->port_id,
                                             queue_id,
                                             port_config->rx_queue_size,
@@ -202,26 +155,6 @@ bool setUpRxQueues(PortConfigConstPtr port_config,
                     port_config->port_id, queue_id, rte_strerror(-ret));
             return false;
         }
-
-#ifdef DISABLE_VLAN_STRIPPING_PER_QUEUE_EX
-        if (!!(ret = rte_eth_dev_set_vlan_strip_on_queue(port_config->port_id,
-                                                         queue_id,
-                                                         0)))
-        {
-            if (ret != -ENOTSUP)
-            {
-                RTE_LOG(ERR, USER1,
-                        "[%hu:%hu] rte_eth_dev_set_vlan_strip_on_queue() failed: %s\n",
-                        port_config->port_id, queue_id, rte_strerror(-ret));
-                return false;
-            }
-
-            RTE_LOG(WARNING, USER1,
-                    "[%hu:%hu] VLAN stripping is not supported (per-queue)\n",
-                    port_config->port_id, queue_id);
-        }
-#endif
-    }
 
     return true;
 }
@@ -369,16 +302,6 @@ bool configurePort(PortConfigPtr port_config, struct rte_mempool* mbuf_pool)
                 port_config->port_id, rte_strerror(-ret));
         return false;
     }
-
-#ifdef DISABLE_VLAN_STRIPPING_PER_PORT_EX
-    if (!controlVlanStripping(port_config->port_id, 1))
-    {
-        RTE_LOG(WARNING, USER1,
-                "[%hu] Failed to disable VLAN stripping\n",
-                port_config->port_id);
-        return false;
-    }
-#endif
 
     port_config->socket_id = rte_eth_dev_socket_id(port_config->port_id);
     if (port_config->socket_id == SOCKET_ID_ANY && rte_errno == EINVAL)
