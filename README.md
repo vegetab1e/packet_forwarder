@@ -23,19 +23,18 @@ Use `Ctrl+C` for stop (2 seconds delay).
     
 ## libpcap-base PMD
 
-```2 ports x 1 queue pairs = 2 forwarders + stats loop (enp1s0 <-> wlp2s0):```
+`2 ports x 1 queue pairs = 2 forwarders + stats loop (enp1s0 <-> wlp2s0):`
 
     sudo ./packet_forwarder -l 0-2 -n 2 --no-pci \
         --vdev 'net_pcap0,iface=enp1s0' --vdev 'net_pcap1,iface=wlp2s0'
         
-```2 ports x 2 queue pairs = 4 forwarders + stats loop (enp1s0 <-> wlp2s0):```
+`2 ports x 2 queue pairs = 4 forwarders + stats loop (enp1s0 <-> wlp2s0):`
 
     sudo ./packet_forwarder -l 0-4 -n 2 --no-pci \
         --vdev 'net_pcap0,rx_iface=enp1s0,rx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0' \
-        --vdev 'net_pcap1,rx_iface=wlp2s0,rx_iface=wlp2s0,tx_iface=wlp2s0,tx_iface=wlp2s0' \
-        -- -q 2
+        --vdev 'net_pcap1,rx_iface=wlp2s0,rx_iface=wlp2s0,tx_iface=wlp2s0,tx_iface=wlp2s0'
 
-```2 ports x 3 queue pairs = 6 forwarders + stats loop (enp1s0 <-> wlp2s0):```
+`2 ports x 3 queue pairs = 6 forwarders + stats loop (enp1s0 <-> wlp2s0):`
 
     sudo ./packet_forwarder -l 0-6 -n 2 --no-pci \
         --vdev 'net_pcap0,rx_iface=enp1s0,rx_iface=enp1s0,rx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0' \
@@ -62,7 +61,7 @@ Use `Ctrl+C` for stop (2 seconds delay).
 
 Эти опции нужно отделять от остальных с помощью `--`, как обычно.
 
-Таким образом, **_общее  количество  потоков  будет  равно  количеству  портов,  умноженному  на  количество  пар  очередей  на  чтение  и  запись  для  каждого  из  них  -  это  потоки  для  пересылки  пакетов,  плюс  основной  поток,  собирающий  и  выводящий  статистику_**. Если логических ядер окажется меньше, то форвардер напишет об этом в лог (уровень `WARNING`) и будет работать с тем количеством, которое есть, запуская потоки так:
+Таким образом, ***общее  количество  потоков  будет  равно  количеству  портов,  умноженному  на  количество  пар  очередей  на  чтение  и  запись  для  каждого  из  них  -  это  потоки  для  пересылки  пакетов,  плюс  основной  поток,  собирающий  и  выводящий  статистику***. Если логических ядер окажется меньше, то форвардер напишет об этом в лог (уровень `WARNING`) и будет работать с тем количеством, которое есть, запуская потоки так:
 
     порт 0, очередь 1, ..., Q
     порт 1, очередь 1, ..., Q
@@ -104,7 +103,7 @@ Use `Ctrl+C` for stop (2 seconds delay).
 над физической (гигабитный интерфейс, витая пара), через которую будет транслироваться видео в качестве 1080p, то запустив форвардер для пересылки пакетов между этими сетями (луп с использованием внешнего трафика) в шесть потоков (по 3 пары очередей на каждый интерфейс)
 
     sudo ./packet_forwarder -l 0-6 -n 2 --no-pci \
-        --vdev 'net_pcap0,rx_iface=enp1s0,rx_iface=enp1s0,rx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0'
+        --vdev 'net_pcap0,rx_iface=enp1s0,rx_iface=enp1s0,rx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0,tx_iface=enp1s0' \
         --vdev 'net_pcap1,rx_iface=vl42,rx_iface=vl42,rx_iface=vl42,tx_iface=vl42,tx_iface=vl42,tx_iface=vl42'
 
 можно получить достаточный для обнаружения ошибок поток данных. **За 10 минут** работы форвардера в таком режиме было переслано **147 127 968 пакетов IPv4/6**, допустим по 576 байт каждый, тогда получается примерно 78,9 гигабайт **без ошибок обработки и 4 отброшенных пакета ARP**.
