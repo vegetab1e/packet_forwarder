@@ -189,8 +189,8 @@ void fillEthernetHeader(struct rte_ether_hdr* ether_header,
                         uint16_t ether_type,
                         uint16_t tx_port_id)
 {
-    srand(time(NULL));
-    const uint64_t random_number = (uint64_t)(rand() % 256) << 40;
+    rte_srand(rte_rdtsc());
+    const uint64_t random_number = (rte_rand() % 256) << 40;
 
     uint8_t* target_mac_addr = (uint8_t*)&ether_header->dst_addr.addr_bytes[0];
     // При заполнении адреса получателя используется 6 младших байт (LE).
