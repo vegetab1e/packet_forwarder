@@ -3,7 +3,7 @@
 You need:
 
 - DPDK 24.11.1
-- Cmake 3.16 or later
+- CMake 3.16 or later
 - A C compiler that supports C99
 - A PCAP library (it's the only way for me).
 
