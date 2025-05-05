@@ -189,6 +189,8 @@ void fillEthernetHeader(struct rte_ether_hdr* ether_header,
                         uint16_t ether_type,
                         uint16_t tx_port_id)
 {
+    // Слишком часто, лучше перенести в lcoreLoop()
+    // и вызывать перед чтением пакетов из очереди!
     rte_srand(rte_rdtsc());
     const uint64_t random_number = (rte_rand() % 256) << 40;
 
